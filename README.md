@@ -24,7 +24,7 @@ Este repo incluye `libopencm3` como submódulo. Para clonar correctamente:
 
 ```bash
 # Clonar el proyecto junto con submódulos
-git clone --recurse-submodules https://github.com/usuario/bluepill-libopencm3.git
+git clone --recurse-submodules https://github.com/LeonardoAmet/bluepill-libopencm3.git
 cd bluepill-libopencm3
 
 # Compilar libopencm3 una vez
