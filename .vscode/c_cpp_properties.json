@@ -1,0 +1,20 @@
+{
+    "configurations": [
+      {
+        "name": "STM32",
+        "includePath": [
+          "${workspaceFolder}/libopencm3/include",
+          "${workspaceFolder}/common",
+          "${workspaceFolder}/labs/02_uart_echo"
+        ],
+        "defines": [
+          "STM32F1"
+        ],
+        "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+        "cStandard": "c11",
+        "intelliSenseMode": "gcc-arm"
+      }
+    ],
+    "version": 4
+  }
+  
