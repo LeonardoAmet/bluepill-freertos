@@ -38,13 +38,17 @@ int main(void) {
     }
 
     while (1) {
-        if (usart_get_flag(USART1, USART_SR_RXNE)) {
+        if (usart_get_flag(USART1, USART_SR_RXNE))
+        {
             char c = usart_recv(USART1);
             // En caso de recibir un retorno de carro o un salto de línea, se envía el otro carácter
             // para que el terminal lo interprete correctamente.
-            if (c == '\r') {
+            if (c == '\r')
+            {
                 usart_send_blocking(USART1, '\n'); // Salto de línea
-            } else if (c == '\n') {
+            }
+            else if (c == '\n')
+            {
                 usart_send_blocking(USART1, '\r'); // Retorno de carro
             }
             usart_send_blocking(USART1, c); // eco
