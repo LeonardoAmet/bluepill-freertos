@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "usart_common_all.h": "c"
+        "usart_common_all.h": "c",
+        "timer.h": "c",
+        "timer_common_all.h": "c",
+        "cortex.h": "c"
     }
 }
