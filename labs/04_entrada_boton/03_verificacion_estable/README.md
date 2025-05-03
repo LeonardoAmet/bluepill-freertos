@@ -1,4 +1,4 @@
-# 🧪 Verificación de botón por estabilidad (antirrebote no bloqueante)
+# Verificación de botón por estabilidad (antirrebote no bloqueante)
 
 Este ejemplo implementa una técnica más avanzada de antirrebote, conocida como **verificación por estabilidad temporal**. En lugar de usar retardos o esperas activas, se valida un cambio de estado solo si el nuevo valor del botón se mantiene durante varias lecturas consecutivas.
 

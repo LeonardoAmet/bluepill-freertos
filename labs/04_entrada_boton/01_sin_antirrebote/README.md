@@ -1,4 +1,4 @@
-# 🛠️ Lectura de botón con detección de flanco (sin antirrebote)
+# Lectura de botón con detección de flanco (sin antirrebote)
 
 Este ejemplo muestra cómo leer un botón conectado a **PA0** para alternar el estado de un LED conectado a **PC13**, sin aplicar ninguna técnica de antirrebote.
 

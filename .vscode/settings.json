@@ -3,6 +3,10 @@
         "usart_common_all.h": "c",
         "timer.h": "c",
         "timer_common_all.h": "c",
-        "cortex.h": "c"
+        "cortex.h": "c",
+        "nvic.h": "c",
+        "rcc.h": "c",
+        "exti.h": "c",
+        "exti_common_all.h": "c"
     }
 }

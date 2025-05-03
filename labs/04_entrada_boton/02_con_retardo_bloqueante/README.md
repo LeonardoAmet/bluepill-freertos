@@ -1,4 +1,4 @@
-# 🕒 Lectura de botón con retardo bloqueante
+# Lectura de botón con retardo bloqueante
 
 Este ejemplo implementa una técnica básica de antirrebote mediante un **retardo bloqueante**, activado solamente cuando se detecta una pulsación válida. Se utiliza además **detección de flanco descendente** para iniciar el proceso de validación, lo cual lo vuelve coherente con el enfoque del proyecto anterior.
 
