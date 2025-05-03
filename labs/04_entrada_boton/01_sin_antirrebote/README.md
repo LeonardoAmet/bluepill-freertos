@@ -1,12 +1,12 @@
-# Lectura de botón con detección de flanco (sin antirrebote)
+# 🛠️ Lectura de botón con detección de flanco (sin antirrebote)
 
-Este ejemplo muestra cómo leer un botón conectado a PA0 para alternar el estado de un LED conectado a PC13, sin aplicar ninguna técnica de antirrebote.
+Este ejemplo muestra cómo leer un botón conectado a **PA0** para alternar el estado de un LED conectado a **PC13**, sin aplicar ninguna técnica de antirrebote.
 
-Se utiliza la detección de flanco descendente (cuando el botón pasa de no presionado a presionado) para evitar múltiples cambios mientras se mantiene presionado. Sin embargo, **no se aplica ningún filtrado** sobre la señal de entrada, por lo que es esperable que el LED se comporte de forma errática al presionar el botón, debido al rebote mecánico.
+Se utiliza la detección de **flanco descendente** (cuando el botón pasa de no presionado a presionado) para evitar múltiples cambios mientras se mantiene presionado. Sin embargo, **no se aplica ningún filtrado** sobre la señal de entrada, por lo que es esperable que el LED se comporte de forma errática al presionar el botón, debido al rebote mecánico.
 
 ---
 
-## Conexión física
+## 🔌 Conexión física
 
 * **PA0** conectado a un botón.
 * El otro terminal del botón va a **GND**.
@@ -15,9 +15,9 @@ Se utiliza la detección de flanco descendente (cuando el botón pasa de no pres
 
 ---
 
-## Funcionamiento del código
+## ⚙️ Funcionamiento del código
 
-* Se configura PA0 como entrada con pull-up interno.
+* Se configura **PA0** como entrada con **pull-up interno**.
 * Se compara el estado actual del botón con el anterior para detectar un **flanco descendente**.
 * Al detectar dicho flanco, se alterna el estado del LED.
 
@@ -25,7 +25,7 @@ Este mecanismo evita múltiples toggles durante una pulsación mantenida, pero *
 
 ---
 
-## ¿Por qué no usar espera por liberación?
+## ⚖️ ¿Por qué no usar "espera por liberación"?
 
 Una alternativa común es esperar a que el botón sea soltado después de registrar una pulsación. Esta técnica se conoce como **espera por liberación**, y su implementación típica consiste en un bucle que no permite avanzar hasta que el botón vuelva a su estado inactivo:
 
@@ -38,6 +38,16 @@ if (gpio_get(GPIOA, GPIO0)) {
 
 Esta forma de control evita múltiples activaciones mientras el botón está presionado, pero es una solución **bloqueante**, que congela la ejecución del programa y limita su escalabilidad.
 
-La técnica implementada en este ejemplo (detección de flanco) es **no bloqueante** y sirve como base para aplicar más adelante técnicas reales de antirrebote por software.
+La técnica implementada en este ejemplo (**detección de flanco**) es **no bloqueante** y sirve como base para aplicar más adelante técnicas reales de antirrebote por software.
 
 ---
+
+## 🚀 Técnicas siguientes sugeridas
+
+* 🔁 **Espera por liberación**: bloqueante, pero sencilla.
+* 🕒 **Retardo bloqueante fijo**: filtra con un `delay` luego del flanco.
+* ⏱️ **Verificación estable**: usa múltiples lecturas consistentes.
+* 🧭 **Con temporizador + ISR**: robusto y no bloqueante.
+* 🧮 **Con contador o filtro digital**: técnica más precisa.
+
+Estas variantes se irán explorando en los siguientes ejemplos dentro de la misma carpeta.

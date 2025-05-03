@@ -1,12 +1,12 @@
-# Lectura de botón con retardo bloqueante
+# 🕒 Lectura de botón con retardo bloqueante
 
 Este ejemplo implementa una técnica básica de antirrebote mediante un **retardo bloqueante**, activado solamente cuando se detecta una pulsación válida. Se utiliza además **detección de flanco descendente** para iniciar el proceso de validación, lo cual lo vuelve coherente con el enfoque del proyecto anterior.
 
-El botón está conectado a PA0 (con pull-up interno activado) y controla el encendido y apagado de un LED conectado a PC13.
+El botón está conectado a **PA0** (con pull-up interno activado) y controla el encendido y apagado de un LED conectado a **PC13**.
 
 ---
 
-## Conexión física
+## 🔌 Conexión física
 
 * **PA0** conectado a un botón.
 * El otro terminal del botón va a **GND**.
@@ -15,7 +15,7 @@ El botón está conectado a PA0 (con pull-up interno activado) y controla el enc
 
 ---
 
-## Funcionamiento del código
+## ⚙️ Funcionamiento del código
 
 * Se mantiene el estado anterior del botón.
 * Se detecta un **flanco descendente**: transición de no presionado (1) a presionado (0).
@@ -25,16 +25,16 @@ El botón está conectado a PA0 (con pull-up interno activado) y controla el enc
 
 ---
 
-## Consideraciones
+## ⚖️ Consideraciones
 
 * Esta técnica **evita el rebote** en la mayoría de los casos.
 * No hay espera de liberación (no se congela el programa hasta que el botón se suelte).
-* Aún así, el uso de `delay()` bloquea temporalmente la ejecución.
+* Aún así, el uso de `delay()` **bloquea temporalmente la ejecución**.
 * Es una solución válida para sistemas simples o como paso intermedio hacia técnicas más avanzadas.
 
 ---
 
-## Objetivo didáctico
+## 🎓 Objetivo didáctico
 
 Este ejemplo permite comparar directamente con el proyecto anterior:
 
@@ -42,3 +42,13 @@ Este ejemplo permite comparar directamente con el proyecto anterior:
 * En este, al aplicar un retardo breve tras detectar el flanco, se mitiga significativamente el efecto del rebote.
 
 Esta progresión ayuda a visualizar el problema y valorar la solución aplicada.
+
+---
+
+## 🚀 Técnicas siguientes sugeridas
+
+* 🧪 **Verificación estable**: requiere que la lectura se mantenga constante durante varias muestras.
+* ⏱️ **Temporizador + ISR**: técnica no bloqueante, escalable y más robusta.
+* 🧮 **Contador o filtro digital**: técnica más precisa para sistemas exigentes.
+
+Estas variantes se desarrollan en los siguientes ejemplos de esta misma carpeta.
