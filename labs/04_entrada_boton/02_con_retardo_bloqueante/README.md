@@ -1,8 +1,8 @@
 # Lectura de botón con retardo bloqueante
 
-Este ejemplo implementa una técnica básica de antirrebote mediante un **retardo bloqueante**. El botón está conectado a PA0 con pull-up interno activado, y controla el encendido y apagado de un LED conectado a PC13.
+Este ejemplo implementa una técnica básica de antirrebote mediante un **retardo bloqueante**, activado solamente cuando se detecta una pulsación válida. Se utiliza además **detección de flanco descendente** para iniciar el proceso de validación, lo cual lo vuelve coherente con el enfoque del proyecto anterior.
 
-Al presionar el botón, el programa introduce un retardo de aproximadamente 20 ms. Si el botón sigue presionado luego del retardo, se considera una pulsación válida y se alterna el estado del LED.
+El botón está conectado a PA0 (con pull-up interno activado) y controla el encendido y apagado de un LED conectado a PC13.
 
 ---
 
@@ -17,29 +17,28 @@ Al presionar el botón, el programa introduce un retardo de aproximadamente 20 m
 
 ## Funcionamiento del código
 
-* Se detecta un nivel bajo en PA0 (flanco descendente → presión de botón).
-* Se espera un retardo fijo (`delay(100000)`), equivalente a \~20 ms.
-* Se vuelve a leer el pin para verificar que el botón siga presionado.
-* Si se confirma, se cambia el estado del LED.
-* Luego, se espera a que el botón sea soltado (vuelva a nivel alto).
+* Se mantiene el estado anterior del botón.
+* Se detecta un **flanco descendente**: transición de no presionado (1) a presionado (0).
+* Se introduce un retardo de \~20 ms para filtrar rebotes.
+* Se verifica que el botón **siga presionado** después del retardo.
+* Si se confirma, se alterna el estado del LED.
 
 ---
 
 ## Consideraciones
 
-* Esta técnica es efectiva y muy fácil de implementar.
-* Sin embargo, el uso de retardo bloqueante **congela la ejecución** del programa durante el tiempo de espera.
-* No es adecuada en sistemas con múltiples tareas o donde se necesite buena capacidad de respuesta.
+* Esta técnica **evita el rebote** en la mayoría de los casos.
+* No hay espera de liberación (no se congela el programa hasta que el botón se suelte).
+* Aún así, el uso de `delay()` bloquea temporalmente la ejecución.
+* Es una solución válida para sistemas simples o como paso intermedio hacia técnicas más avanzadas.
 
 ---
 
-## Comparación con otras técnicas
+## Objetivo didáctico
 
-Más adelante se explorarán otras estrategias más eficientes y no bloqueantes, como:
+Este ejemplo permite comparar directamente con el proyecto anterior:
 
-* Verificación por tiempo estable
-* Contador de estabilidad (integrador)
-* Uso de timer
-* Uso de interrupciones externas (EXTI)
+* En el proyecto anterior se usaba flanco descendente **sin antirrebote**, y era evidente el efecto del rebote.
+* En este, al aplicar un retardo breve tras detectar el flanco, se mitiga significativamente el efecto del rebote.
 
-Este ejemplo sirve como base introductoria y de contraste para esas soluciones.
+Esta progresión ayuda a visualizar el problema y valorar la solución aplicada.

@@ -1,7 +1,7 @@
 #include <libopencm3/stm32/rcc.h>     // Configuración del reloj del sistema
 #include <libopencm3/stm32/gpio.h>    // Control de pines GPIO
 
-// Función de retardo bloqueante mediante bucle ocupado
+// Función de retardo bloqueante mediante bucle ocupado (~20 ms aprox)
 void delay(volatile int count) {
     while (count--) {
         __asm__("nop"); // No Operation: mantiene la CPU ocupada
@@ -21,33 +21,33 @@ int main(void) {
                   GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
     gpio_set(GPIOC, GPIO13); // Apaga el LED (activo en bajo)
 
-    // Activa resistencia de pull-up interna en PA0
-    gpio_set(GPIOA, GPIO0); // Setea el pin en alto
+    // Activa resistencia de pull-up interna en PA0 (entrada botón)
+    gpio_set(GPIOA, GPIO0); // Pull-up interno
     gpio_set_mode(GPIOA, GPIO_MODE_INPUT,
                   GPIO_CNF_INPUT_PULL_UPDOWN, GPIO0);
 
-    int led_on = 0; // Estado del LED (0 = apagado, 1 = encendido)
+    int estado_anterior = 1; // Estado inicial: botón no presionado
+    int led_on = 0;
 
     while (1) {
-        // Detecta presión del botón (nivel bajo en PA0)
-        if (gpio_get(GPIOA, GPIO0) == 0) {
-            // Retardo de aproximadamente 20 ms para filtrar rebotes
-            delay(100000);
+        int estado_actual = gpio_get(GPIOA, GPIO0);
 
-            // Verifica si el botón sigue presionado después del retardo
+        // Detecta flanco descendente (1 → 0)
+        if (estado_anterior && !estado_actual) {
+            delay(100000); // Retardo bloqueante (~20 ms)
+
+            // Verifica que el botón siga presionado después del retardo
             if (gpio_get(GPIOA, GPIO0) == 0) {
-                led_on = !led_on; // Alterna el estado del LED
+                led_on = !led_on;
 
                 if (led_on) {
                     gpio_clear(GPIOC, GPIO13); // Enciende LED
                 } else {
                     gpio_set(GPIOC, GPIO13);   // Apaga LED
                 }
-
-                // Espera a que se suelte el botón antes de permitir otro toggle
-                while (gpio_get(GPIOA, GPIO0) == 0);
             }
         }
+
+        estado_anterior = estado_actual; // Actualiza para el próximo ciclo
     }
 }
-// Fin del programa
