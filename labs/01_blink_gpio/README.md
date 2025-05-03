@@ -69,3 +69,67 @@ Asegurate de tener instalados: `arm-none-eabi-gcc`, `make` y `OpenOCD`.
 * ⚠️ **Nota:** Esta versión del ejemplo incluye una línea explícita para configurar el sistema a 72 MHz utilizando un cristal externo de 8 MHz: `rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);`. Si se omite, el sistema funcionará con el reloj interno (HSI), generando un retardo mucho mayor al esperado.
 * Se usa `gpio_toggle()` para invertir el estado del pin
 * El uso de retardos con bucles de NOP solo es válido como técnica didáctica
+# Parpadeo de LED con retardo por software
+
+Este ejemplo muestra cómo generar un parpadeo simple en el LED de la placa Blue Pill utilizando un bucle de retardo por software. Es una de las formas más sencillas de generar una temporización sin depender de temporizadores ni interrupciones.
+
+## 🎯 Objetivo
+
+* Configurar un pin como salida digital.
+* Alternar su estado en un bucle infinito.
+* Introducir un retardo usando instrucciones NOP para observar el parpadeo.
+
+## 🧠 Teoría: GPIO en STM32
+
+Los pines GPIO (*General Purpose Input/Output*) permiten configurar cada pin del microcontrolador como entrada o salida digital. En STM32, cada pin se configura mediante tres aspectos clave:
+
+* **Modo de funcionamiento**: entrada, salida, función alternativa o analógica.
+* **Velocidad de salida**: en MHz (generalmente 2, 10 o 50 MHz).
+* **Tipo de salida**: push-pull o open-drain.
+
+Para configurar un pin como salida push-pull:
+
+1. Se habilita el reloj del puerto correspondiente (por ejemplo, GPIOC).
+2. Se usa `gpio_set_mode(...)` con los parámetros adecuados.
+3. Se usa `gpio_set(...)`, `gpio_clear(...)` o `gpio_toggle(...)` para controlar su valor lógico.
+
+En este ejemplo se configura el pin **PC13** como salida digital push-pull de 2 MHz.
+
+## ⚙️ Descripción del funcionamiento
+
+El programa realiza los siguientes pasos:
+
+1. Configura el sistema de reloj a 72 MHz utilizando un cristal externo de 8 MHz.
+2. Habilita el reloj del puerto GPIOC.
+3. Configura el pin PC13 como salida push-pull.
+4. En un bucle infinito:
+
+   * Alterna el estado del pin PC13 (encendiendo o apagando el LED).
+   * Ejecuta un bucle de retardo (donde se suelen usar instrucciones NOP, aunque no son estrictamente necesarias).
+
+El LED se encuentra conectado al pin **PC13**. Este LED está activo en bajo (se enciende con un 0 lógico).
+
+## ⏳ Sobre el retardo
+
+El retardo se genera mediante un bucle con 800000 iteraciones, utilizando la instrucción `__asm__("nop")`. Esto mantiene a la CPU ocupada sin realizar ninguna operación útil (bucle bloqueante). El retardo exacto dependerá de la frecuencia del sistema (en este caso, 72 MHz).
+
+> 📌 Esta técnica es útil para pruebas rápidas, pero **no es precisa** ni recomendable para proyectos complejos.
+
+## 🔧 Requisitos
+
+* Placa STM32F103C8T6 (Blue Pill)
+* Toolchain `arm-none-eabi-gcc`
+* Biblioteca libopencm3 como submódulo
+* `make` y `openocd`
+
+## 🧪 Compilación y carga
+
+```bash
+make
+make flash
+```
+
+## 📚 Observación adicional
+
+* Esta técnica se conoce como **espera activa** o *busy wait*, y es **bloqueante**: impide que el microcontrolador realice otras tareas durante el retardo.
+* Más adelante se introducen técnicas con temporizadores (Timers) que permiten generar retardos precisos y no bloqueantes.
