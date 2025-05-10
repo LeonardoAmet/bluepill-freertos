@@ -6,57 +6,67 @@
 #include <stdbool.h>                   // Para usar tipo bool
 
 // === Parámetros configurables ===
-#define UMBRAL_REBOTE_MS       20        // Tiempo de antirrebote (en milisegundos)
+#define UMBRAL_ESTABILIDAD     20        // 20 lecturas estables → se requieren 20 ms de estabilidad
 #define TIMER_PRESCALER        7200      // 72 MHz / 7200 = 10 kHz
 #define TIMER_FREQ_HZ          1000      // 10 kHz / 10 = 1 kHz (1 ms entre interrupciones)
 #define TIMER_PERIOD           (rcc_ahb_frequency / TIMER_PRESCALER / TIMER_FREQ_HZ)
 
 // === Variables globales (compartidas entre main e ISRs) ===
-volatile bool debounce_active      = false;     // Indica si el temporizador está "filtrando"
-volatile uint32_t debounce_counter = 0;         // Cuenta cuántos ms pasaron desde la interrupción
-volatile bool led_on               = false;     // Estado actual del LED
+volatile int contador_estabilidad   = 0;
+volatile int estado_estable         = 1;
+volatile int lectura_anterior       = 1;
+volatile int led_on                 = 0;
 
-// === ISR del Timer 2 ===
-// Se ejecuta cada 1 ms mientras dure el proceso de antirrebote.
+// === Interrupción del Timer TIM2 ===
+// Se ejecuta automáticamente cada 1 ms
 void tim2_isr(void) {
     if (timer_get_flag(TIM2, TIM_SR_UIF)) {
-        timer_clear_flag(TIM2, TIM_SR_UIF);
+        timer_clear_flag(TIM2, TIM_SR_UIF);  // Limpia la bandera de interrupción
 
-        debounce_counter++;
-        if (debounce_counter >= UMBRAL_REBOTE_MS) {
-            debounce_counter = 0;
-            timer_disable_irq(TIM2, TIM_DIER_UIE);     // Detiene la interrupción del timer
-            timer_disable_counter(TIM2);               // Detiene el timer
-            debounce_active = false;
+        int lectura = gpio_get(GPIOA, GPIO0);  // Lee el botón (activo en bajo)
 
-            // Si después del tiempo de rebote el botón sigue presionado
-            if (gpio_get(GPIOA, GPIO0) == 0) {
-                led_on = !led_on;                      // Alterna el LED
-                if (led_on)
-                    gpio_clear(GPIOC, GPIO13);         // LED ON (activo en bajo)
-                else
-                    gpio_set(GPIOC, GPIO13);           // LED OFF
+        if (lectura == lectura_anterior) {
+            contador_estabilidad++;
+            if (contador_estabilidad >= UMBRAL_ESTABILIDAD) {
+                estado_estable = lectura;
+                contador_estabilidad = 0;
+
+                // Si es estado estable es 0, entonces efectivamente detectamos una pulsación
+                if (estado_estable == 0) {
+                    led_on = !led_on;
+                    if (led_on)
+                        gpio_clear(GPIOC, GPIO13);  // LED ON
+                    else
+                        gpio_set(GPIOC, GPIO13);    // LED OFF
+                }
+
+                // Fin del proceso de antirrebote
+                timer_disable_irq(TIM2, TIM_DIER_UIE);
+                timer_disable_counter(TIM2);
+                exti_reset_request(EXTI0);
+                exti_enable_request(EXTI0);
             }
-
-            exti_reset_request(EXTI0);                 // Limpia la bandera de EXTI
-            exti_enable_request(EXTI0);                // Reactiva EXTI0
+        } else {
+            contador_estabilidad = 0;
         }
+        // Actualiza la lectura anterior
+        lectura_anterior = lectura;
     }
 }
 
 // === ISR de EXTI0 ===
 // Se ejecuta cuando se detecta un flanco descendente en PA0.
 void exti0_isr(void) {
-    exti_disable_request(EXTI0);       // Desactiva temporalmente EXTI0
-    exti_reset_request(EXTI0);         // Limpia bandera de EXTI0
+    exti_disable_request(EXTI0);
+    exti_reset_request(EXTI0);
 
-    debounce_active = true;            // Inicia proceso de antirrebote
-    debounce_counter = 0;
+    contador_estabilidad = 0;
 
-    timer_set_counter(TIM2, 0);        // Reinicia el contador del timer
-    timer_enable_irq(TIM2, TIM_DIER_UIE);  // Habilita interrupción por update
-    timer_enable_counter(TIM2);            // Comienza a contar
+    timer_set_counter(TIM2, 0);
+    timer_enable_irq(TIM2, TIM_DIER_UIE);
+    timer_enable_counter(TIM2);
 }
+
 
 // === Configuración de pines GPIO ===
 static void gpio_setup(void) {

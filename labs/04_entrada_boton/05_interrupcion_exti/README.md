@@ -1,6 +1,8 @@
 # Antirrebote usando interrupción externa (EXTI) y temporizador
 
-Este ejemplo combina el uso del periférico **EXTI** con un **temporizador** para implementar una técnica de antirrebote **eficiente, no bloqueante y precisa**. Ante un flanco descendente (presión del botón), se desactiva la interrupción externa y se habilita un temporizador que valida el estado pasado cierto tiempo. Si el botón sigue presionado luego del retardo, se considera válido el evento.
+Este ejemplo combina el uso del periférico **EXTI** con un **temporizador** para implementar una técnica de antirrebote **eficiente, no bloqueante y precisa**. Ante un flanco descendente (presión del botón), se desactiva la interrupción externa y se habilita un temporizador que verifica que la lectura del botón permanezca constante durante un período de tiempo. Solo si el estado es estable durante todo ese intervalo, se considera válida la pulsación.
+
+Una vez validada (o descartada), se detiene el temporizador y se vuelve a habilitar la interrupción externa.
 
 ---
 
@@ -24,6 +26,7 @@ Este ejemplo combina el uso del periférico **EXTI** con un **temporizador** par
 4. Cuando el temporizador alcanza el tiempo de espera (ej. 20 ms):
 
    * Si el botón **sigue presionado**, se alterna el estado del LED.
+   * Se desactiva la interrupción de timer.
    * Se reactiva la interrupción externa.
 
 ---
@@ -68,7 +71,7 @@ Este ejemplo combina el uso del periférico **EXTI** con un **temporizador** par
 
 ### Tabla de vectores de interrupción
 
-Cuando ocurre un evento EXTI, el microcontrolador consulta la **tabla de vectores**, una estructura que contiene las direcciones de las funciones ISR (Interrupt Service Routine). Por ejemplo:
+Cuando ocurre un evento EXTI, el microcontrolador consulta la **tabla de vectores**, un array que contiene las direcciones de las funciones ISR (Interrupt Service Routine). Por ejemplo:
 
 * Para `EXTI0`, se ejecuta `void exti0_isr(void)`.
 
@@ -78,7 +81,7 @@ Este mecanismo permite que el programa "salte automáticamente" a ejecutar una f
 
 * Se configura para generar una interrupción cada 1 ms.
 * Se ajustan `prescaler` y `period` usando `rcc_ahb_frequency`.
-* En su ISR, lleva la cuenta del tiempo transcurrido desde que se activó el antirrebote.
+* En su ISR, esperamos a que la lectura de la entrada sea estable durante 20 ms.
 
 ---
 
