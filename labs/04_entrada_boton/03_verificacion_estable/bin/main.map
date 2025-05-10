@@ -560,15 +560,15 @@ LOAD linker stubs
  .debug_line    0x000015ae      0x2ad ../../../libopencm3/lib/libopencm3_stm32f1.a(vector.o)
  .debug_line    0x0000185b      0x22c ../../../libopencm3/lib/libopencm3_stm32f1.a(flash_common_all.o)
 
-.debug_str      0x00000000     0xe21d
- .debug_str     0x00000000     0xe21d bin/main.o
-                                0x572 (size before relaxing)
- .debug_str     0x0000e21d     0x82ba ../../../libopencm3/lib/libopencm3_stm32f1.a(gpio.o)
- .debug_str     0x0000e21d     0x82b8 ../../../libopencm3/lib/libopencm3_stm32f1.a(gpio_common_all.o)
- .debug_str     0x0000e21d     0x7f1a ../../../libopencm3/lib/libopencm3_stm32f1.a(rcc.o)
- .debug_str     0x0000e21d     0x761d ../../../libopencm3/lib/libopencm3_stm32f1.a(rcc_common_all.o)
- .debug_str     0x0000e21d     0x6309 ../../../libopencm3/lib/libopencm3_stm32f1.a(vector.o)
- .debug_str     0x0000e21d     0x5208 ../../../libopencm3/lib/libopencm3_stm32f1.a(flash_common_all.o)
+.debug_str      0x00000000     0xe231
+ .debug_str     0x00000000     0xe231 bin/main.o
+                                0x586 (size before relaxing)
+ .debug_str     0x0000e231     0x82ba ../../../libopencm3/lib/libopencm3_stm32f1.a(gpio.o)
+ .debug_str     0x0000e231     0x82b8 ../../../libopencm3/lib/libopencm3_stm32f1.a(gpio_common_all.o)
+ .debug_str     0x0000e231     0x7f1a ../../../libopencm3/lib/libopencm3_stm32f1.a(rcc.o)
+ .debug_str     0x0000e231     0x761d ../../../libopencm3/lib/libopencm3_stm32f1.a(rcc_common_all.o)
+ .debug_str     0x0000e231     0x6309 ../../../libopencm3/lib/libopencm3_stm32f1.a(vector.o)
+ .debug_str     0x0000e231     0x5208 ../../../libopencm3/lib/libopencm3_stm32f1.a(flash_common_all.o)
 
 .comment        0x00000000       0x26
  .comment       0x00000000       0x26 bin/main.o

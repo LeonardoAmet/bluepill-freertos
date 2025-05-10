@@ -27,7 +27,7 @@ static void usart_setup(void) {
 }
 
 int main(void) {
-    rcc_clock_setup_in_hse_8mhz_out_72mhz(); // Requiere que tengas HSE de 8 MHz
+    rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
 
     usart_setup();
 
