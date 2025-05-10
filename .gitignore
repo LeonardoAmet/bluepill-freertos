@@ -1,0 +1,22 @@
+# Archivos de configuración local
+.vscode/
+
+# Salida de compilación
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+*.srec
+
+# Carpetas típicas de salida (si las usás)
+build/
+output/
+
+# Archivos de respaldo o temporales
+*~
+*.swp
+.DS_Store
+Thumbs.db

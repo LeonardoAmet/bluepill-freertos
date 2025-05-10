@@ -5,7 +5,7 @@
         "includePath": [
           "${workspaceFolder}/libopencm3/include",
           "${workspaceFolder}/common",
-          "${workspaceFolder}/labs/02_uart_echo"
+          "${workspaceFolder}/labs/**"
         ],
         "defines": [
           "STM32F1"
