@@ -21,11 +21,13 @@ SECTIONS
   } >rom
 
   /* Sección .ARM.exidx para soporte de excepciones (opcional) */
+  /*
   .ARM.exidx : {
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
   } >rom
+  */
 
   /* .data en RAM, pero viene desde ROM */
   .data : AT (_etext) {
@@ -68,4 +70,10 @@ SECTIONS
 
   /* Símbolos auxiliares */
   _etext = LOADADDR(.text) + SIZEOF(.text);
+
+  /DISCARD/ :
+  {
+    *(.ARM.exidx*)
+  }
+
 }
