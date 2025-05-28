@@ -1,45 +1,37 @@
-# bluepill-libopencm3
+> 🧠 Este repositorio contiene únicamente ejemplos que utilizan **FreeRTOS** sobre STM32F103C8T6 y **libopencm3**.
+> No incluye ejemplos bare-metal. Para esos, consultá el repositorio `bluepill-libopencm3`.
 
-Este repositorio contiene ejemplos para la placa STM32F103C8T6 (conocida como "Blue Pill") usando la biblioteca [libopencm3](https://github.com/libopencm3/libopencm3). Está pensado como material de apoyo para la materia **Sistemas Embebidos** (UADE).
+# Proyecto Base: FreeRTOS + libopencm3 en STM32F103C8T6
 
----
-
-## ✨ ¿Qué es libopencm3?
-
-`libopencm3` es una biblioteca de bajo nivel para microcontroladores ARM Cortex-M. Proporciona acceso directo a los periféricos mediante funciones C, sin dependencias externas ni HALs pesados. No usa drivers automáticos ni configuradores visuales: **el objetivo es que vos controles todo el hardware**.
-
-A diferencia de CMSIS:
-
-- `libopencm3` implementa su propio startup, vector de interrupciones, funciones de inicialización y periféricos.
-- Internamente usa CMSIS **solo para definiciones básicas** (nombres de registros, etc.), pero no depende de HAL ni de `system_stm32f1xx.c` ni de `startup.s` personalizados.
-- Te permite escribir firmware liviano, portándolo entre placas de ST, NXP, TI, etc. con la misma API.
-
-**Ideal para aprender cómo funciona el microcontrolador sin abstracciones innecesarias.**
+Este repositorio contiene una base mínima pero funcional para trabajar con **FreeRTOS** sobre un microcontrolador **STM32F103C8T6**, usando la biblioteca **libopencm3**. Está pensado como punto de partida para proyectos con múltiples tareas, sincronización, y periféricos del microcontrolador.
 
 ---
 
-## 🚀 Cómo clonar y compilar
+## 🧱 Estructura del proyecto
 
-Este repo incluye `libopencm3` como submódulo. Para clonar correctamente:
+```
+/common                → linker.ld
+/freertos              → código fuente de FreeRTOS
+/libopencm3            → submódulo con libopencm3
+/freertos-labs/        → proyectos basados en FreeRTOS
+```
+
+Cada subcarpeta en `freertos-labs/` es un proyecto independiente con su propio `Makefile`.
+
+---
+
+## ⚙️ Compilación
+
+Para compilar un proyecto:
 
 ```bash
-# Clonar el proyecto junto con submódulos
-git clone --recurse-submodules https://github.com/LeonardoAmet/bluepill-libopencm3.git
-cd bluepill-libopencm3
-
-# Compilar libopencm3 una vez
-cd libopencm3
+cd freertos-labs/01_blink_task
 make
 ```
 
-Luego podés compilar cualquier ejemplo:
+Esto genera el binario `.elf`, `.bin` y `.hex` en la carpeta `bin/`.
 
-```bash
-cd labs/01_blink_gpio
-make
-```
-
-Y flashear con:
+Para flashear con OpenOCD:
 
 ```bash
 make flash
@@ -47,50 +39,56 @@ make flash
 
 ---
 
-## 📂 Estructura del proyecto
+## 🧠 Detalles técnicos importantes
 
-- `labs/` → Contiene los ejemplos por tema (GPIO, UART, PWM, etc.)
-- `common/` → Archivos compartidos como el `linker.ld`
-- `libopencm3/` → Submódulo con la biblioteca original
+### ✔️ FreeRTOS y la tabla de vectores
 
-Cada lab tiene su propio `Makefile`, pero todos comparten:
+FreeRTOS necesita que los siguientes handlers estén **exactamente en la tabla de vectores** del micro:
 
-- `linker.ld` hecho a medida para STM32F103C8T6
-- Vector de interrupciones y startup provistos por `libopencm3`, ya compilados
+* `vPortSVCHandler`
+* `xPortPendSVHandler`
+* `xPortSysTickHandler`
 
-No necesitas `startup.s` ni `system_stm32f1xx.c` personalizados.
+Sin embargo, libopencm3 define sus propios handlers (`sv_call_handler`, `pend_sv_handler`, `sys_tick_handler`) como `__weak`.
 
----
+### ✅ Solución adoptada
 
-## 🔍 Dónde aprender más
+Este proyecto **no redefine funciones ni usa `alias()`**. En cambio, usa una técnica más simple: **macros en `FreeRTOSConfig.h`** que redirigen los nombres requeridos por FreeRTOS a los handlers definidos por libopencm3:
 
-- Documentación oficial: https://libopencm3.org
-- Código fuente: [https://github.com/libopencm3/libopencm3](https://github.com/libopencm3/libopencm3)
-- Ejemplos: mirá los que están dentro de `libopencm3-examples` o este mismo repo
-- Archivos clave:
-  - `libopencm3/lib/cm3/vector.c` → contiene el reset handler y la lógica de inicio (copiar .data, limpiar .bss, llamar a main)
-  - `libopencm3/lib/cm3/vector_nvic.c` → funciones para manipular NVIC (habilitar, deshabilitar, setear prioridades)
+```c
+#define vPortSVCHandler     sv_call_handler
+#define xPortPendSVHandler  pend_sv_handler
+#define xPortSysTickHandler sys_tick_handler
+```
 
----
-
-## 📆 Pensado para la cursada
-
-Este repo está en construcción. Vas a encontrar ejemplos guiados que siguen la metodología de clase, sin automatismos. La idea es que entiendas cada paso del proceso de inicialización, uso de periféricos y compilación. Cualquier cambio que hagas, podés versionarlo con `git`.
-
-Si tenés dudas, revisá:
-- El repo de la cátedra: [https://github.com/LeonardoAmet/bluepill-cmsis-drivers](https://github.com/LeonardoAmet/bluepill-cmsis-drivers)
-- Esta guía paso a paso
-- Los apuntes de clase
+Esto asegura que FreeRTOS funcione correctamente sin conflictos de símbolos ni problemas de linker.
 
 ---
 
-✅ Primera prueba recomendada: `labs/01_blink_gpio`
+## 📌 Dependencias
 
-- Enciende y apaga el LED de PC13
-- Usa funciones de `libopencm3` para habilitar GPIOC, configurar el pin y hacer toggle
-- No usa delays de HAL: todo es bajo nivel y controlado por vos
+* [libopencm3](https://github.com/libopencm3/libopencm3) (agregado como submódulo)
+* [FreeRTOS kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel)
+* Toolchain: `arm-none-eabi-gcc`, `make`, `openocd`, `gdb-multiarch`
 
+---
 
+## 🔧 Debug con VS Code
 
+Este proyecto utiliza la extensión Cortex-Debug para Visual Studio Code, la cual permite depurar firmware ARM Cortex-M a través de gdb-multiarch y OpenOCD.
 
+Incluye configuración en `.vscode/launch.json` para depuración con `gdb-multiarch` y `OpenOCD`. Verificá que el archivo ELF y los paths sean correctos para tu proyecto:
 
+```json
+"executable": "${workspaceFolder}/freertos-labs/01_blink_task/bin/main.elf",
+"configFiles": [
+    "interface/stlink.cfg",
+    "target/stm32f1x.cfg"
+]
+```
+
+---
+
+## 📜 Licencia
+
+MIT para el código propio. FreeRTOS y libopencm3 tienen sus propias licencias compatibles.

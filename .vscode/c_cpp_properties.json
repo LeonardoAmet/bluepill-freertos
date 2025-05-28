@@ -5,7 +5,9 @@
         "includePath": [
           "${workspaceFolder}/libopencm3/include",
           "${workspaceFolder}/common",
-          "${workspaceFolder}/labs/**"
+          "${workspaceFolder}/labs/**",
+          "${workspaceFolder}/freertos-labs/**",
+          "${workspaceFolder}/freertos/**"
         ],
         "defines": [
           "STM32F1"
