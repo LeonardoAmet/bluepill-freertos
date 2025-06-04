@@ -10,7 +10,7 @@
 #define LED_PORT GPIOC
 #define LED_PIN  GPIO13
 
-#define USART    USART1
+
 
 static QueueHandle_t rx_queue;
 
@@ -87,7 +87,7 @@ static void gpio_setup(void) {
     rcc_periph_clock_enable(RCC_GPIOC);
     gpio_set_mode(LED_PORT, GPIO_MODE_OUTPUT_2_MHZ,
                   GPIO_CNF_OUTPUT_PUSHPULL, LED_PIN);
-    gpio_clear(LED_PORT, LED_PIN); // LED apagado
+    
 }
 
 int main(void) {

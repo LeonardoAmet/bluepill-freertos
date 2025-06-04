@@ -88,6 +88,47 @@ Incluye configuración en `.vscode/launch.json` para depuración con `gdb-multia
 ```
 
 ---
+### 🔧 Mecanismos de sincronización en FreeRTOS
+
+En sistemas de tiempo real como FreeRTOS, los mecanismos de sincronización son fundamentales para coordinar el acceso a recursos compartidos, sincronizar tareas y responder a eventos generados por interrupciones. FreeRTOS ofrece distintas primitivas que permiten implementar desde exclusión mutua hasta transferencia de datos o señalización de eventos.
+
+A continuación se presenta una descripción breve de cada uno:
+
+* **Mutex**: se utiliza para proteger recursos compartidos entre tareas. Solo una tarea puede tener el mutex a la vez. Implementa herencia de prioridad, lo que lo hace ideal para evitar la inversión de prioridades.
+* **Recursive Mutex**: similar al mutex, pero permite que una misma tarea lo tome múltiples veces (por ejemplo, en funciones recursivas o anidadas).
+* **Semáforo binario**: permite la señalización de eventos entre tareas o desde interrupciones. No protege recursos ni tiene herencia de prioridad. Es útil, por ejemplo, para indicar que ocurrió un evento.
+* **Semáforo de conteo**: permite acumular eventos (por ejemplo, varias interrupciones), ya que su contador puede incrementarse varias veces. No transfiere datos, pero es útil para sincronizar con tareas que procesan eventos múltiples.
+* **Queue**: permite pasar datos entre tareas o desde interrupciones de manera segura y ordenada (FIFO). También sincroniza, pero su función principal es el paso de datos.
+* **Event group**: permite que una tarea espere a que se cumplan una o varias condiciones (bits). Es útil para coordinar tareas que deben reaccionar a múltiples eventos.
+* **Delay / Sleep**: no es un mecanismo de sincronización entre tareas, pero permite suspender la ejecución de una tarea por un período definido.
+
+### 📋 Resumen comparativo
+
+| Mecanismo              | Uso típico                          | ¿Herencia de prioridad? | ¿Desde ISR? |
+| ---------------------- | ----------------------------------- | ----------------------- | ----------- |
+| **Mutex**              | Exclusión mutua                     | ✅ Sí                    | ❌ No        |
+| **Recursive Mutex**    | Exclusión mutua (recursiva)         | ✅ Sí                    | ❌ No        |
+| **Semáforo binario**   | Señalización (evento)               | ❌ No                    | ✅ Sí        |
+| **Semáforo de conteo** | Acumulación de eventos              | ❌ No                    | ✅ Sí        |
+| **Queue**              | Paso de datos                       | ❌ No                    | ✅ Sí        |
+| **Event group**        | Sincronización de múltiples eventos | ❌ No                    | ✅ Sí        |
+| **Delay / Sleep**      | Suspensión temporal de tareas       | ❌ No                    | ❌ No        |
+
+**Notas:**
+
+* ✅ **Herencia de prioridad**: permite que una tarea de baja prioridad que posee un recurso compartido herede temporalmente la prioridad de una tarea más prioritaria que espera ese recurso. Esto previene la inversión de prioridades.
+* **Mutex** y **Recursive Mutex** son los únicos mecanismos de FreeRTOS que implementan herencia de prioridad.
+* Los **semáforos** y **queues** son seguros para usar en ISRs con sus funciones terminadas en `FromISR()`.
+* Las **queues** permiten pasar datos y sincronizar a la vez, mientras que los **semáforos** sólo sincronizan.
+
+Para más información:
+
+* [Mutexes - FreeRTOS](https://www.freertos.org/RTOS-mutexes.html)
+* [Semaphores](https://www.freertos.org/RTOS-semaphores.html)
+* [Queues](https://www.freertos.org/a00116.html)
+* [Event Groups](https://www.freertos.org/event-groups-RTOS.html)
+
+---
 
 ## 📜 Licencia
 
