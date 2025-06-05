@@ -49,7 +49,7 @@ int main(void) {
 }
 ```
 
-> 🔍 El bucle con `nop` genera un retardo visible, pero no preciso. A 72 MHz, este retardo es notoriamente más corto que medio segundo. Esta técnica es útil solo como ejercicio básico, ya que depende de muchos factores y no es precisa ni estable.. No es una técnica precisa ni recomendable para código de producción, pero es útil como primer ejercicio.
+> 🔍 El bucle con `nop` genera un retardo visible, pero no preciso. A 72 MHz, este retardo es notoriamente más corto que medio segundo. Esta técnica es útil solo como ejercicio básico, ya que depende de muchos factores y no es precisa ni estable. No es una técnica precisa ni recomendable para código de producción, pero es útil como primer ejercicio.
 
 ---
 
