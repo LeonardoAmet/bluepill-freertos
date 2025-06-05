@@ -1,0 +1,39 @@
+name: Build Embedded Projects
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install arm-none-eabi-gcc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi make
+
+      - name: Build Makefile projects
+        run: |
+          set -e
+          for dir in labs/* freertos-labs/*; do
+            # Saltar carpetas no deseadas
+            if [[ "$dir" == *experimental* || "$dir" == *no-ci* ]]; then
+              echo "Skipping $dir"
+              continue
+            fi
+
+            # Compilar si hay Makefile
+            if [ -f "$dir/Makefile" ]; then
+              echo "Building $dir"
+              make -C "$dir"
+            else
+              echo "No Makefile in $dir, skipping"
+            fi
+          done
