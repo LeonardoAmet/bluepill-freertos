@@ -135,10 +135,11 @@ A continuación se presenta una descripción breve de cada uno:
 
 Para más información:
 
-* [Mutexes - FreeRTOS](https://www.freertos.org/RTOS-mutexes.html)
-* [Semaphores](https://www.freertos.org/RTOS-semaphores.html)
-* [Queues](https://www.freertos.org/a00116.html)
-* [Event Groups](https://www.freertos.org/event-groups-RTOS.html)
+* [Mutexes - FreeRTOS](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/04-Mutexes)
+* [Semáforos binarios](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/02-Binary-semaphores)
+* [Semáforos de conteo](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/03-Counting-semaphores)
+* [Queues](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/01-Queues)
+* [Event Groups](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/06-Event-groups)
 
 ---
 
