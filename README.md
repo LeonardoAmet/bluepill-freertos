@@ -37,6 +37,18 @@ Para flashear con OpenOCD:
 make flash
 ```
 
+## 🧪 Tests
+
+Se provee un entorno de pruebas basado en [Unity](https://www.throwtheswitch.org/unity) para
+ejecutar el código en el host, con implementaciones ficticias de las funciones de `libopencm3` y FreeRTOS.
+Para compilar y correr todos los tests simplemente ejecutá:
+
+```bash
+make test
+```
+
+Esto compila los test dentro de `tests/` y corre el binario resultante.
+
 ---
 
 ## 🧠 Detalles técnicos importantes

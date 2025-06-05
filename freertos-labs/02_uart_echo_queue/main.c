@@ -90,6 +90,7 @@ static void gpio_setup(void) {
     
 }
 
+#ifndef UNIT_TEST
 int main(void) {
     rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
 
@@ -106,3 +107,4 @@ int main(void) {
 
     while (1); // no debería llegar nunca
 }
+#endif // UNIT_TEST
