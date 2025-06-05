@@ -9,7 +9,11 @@
 #define UMBRAL_ESTABILIDAD     20        // 20 lecturas estables → se requieren 20 ms de estabilidad
 #define TIMER_PRESCALER        7200      // 72 MHz / 7200 = 10 kHz
 #define TIMER_FREQ_HZ          1000      // 10 kHz / 10 = 1 kHz (1 ms entre interrupciones)
-#define TIMER_PERIOD           (rcc_ahb_frequency / TIMER_PRESCALER / TIMER_FREQ_HZ)
+// TIMER_CLOCK_HZ calcula la frecuencia real que alimenta a TIM2. Si el bus
+// APB1 tiene prescaler diferente de 1, la señal al timer se duplica.
+#define TIMER_CLOCK_HZ         ((rcc_apb1_frequency == rcc_ahb_frequency) ? \
+                                rcc_apb1_frequency : rcc_apb1_frequency * 2)
+#define TIMER_PERIOD           (TIMER_CLOCK_HZ / TIMER_PRESCALER / TIMER_FREQ_HZ)
 
 // === Variables globales (compartidas entre main e ISRs) ===
 volatile int contador_estabilidad   = 0;

@@ -9,14 +9,17 @@
 #define UMBRAL_ESTABILIDAD     20       // 20 lecturas estables → se requieren 20 ms de estabilidad
 
 // ⚠️ Nota sobre el cálculo del período del timer:
-// En lugar de asumir una frecuencia fija como 72 MHz, utilizamos la variable
-// global `rcc_ahb_frequency`, provista por libopencm3. Esta variable se
-// actualiza automáticamente cuando se llama a `rcc_clock_setup_pll(...)`.
-// Equivale conceptualmente a `SystemCoreClock` en CMSIS.
+// En lugar de asumir una frecuencia fija como 72 MHz, consultamos las
+// variables `rcc_apb1_frequency` y `rcc_ahb_frequency` provistas por
+// libopencm3. Estas se actualizan automáticamente cuando se llama a
+// `rcc_clock_setup_pll(...)`.
 //
-// De este modo, el valor de TIMER_PERIOD se adapta a la configuración activa
-// del reloj del sistema, sin necesidad de hardcodear valores.
-#define TIMER_PERIOD  (rcc_ahb_frequency / TIMER_PRESCALER / TIMER_FREQUENCY_HZ)
+// Así, `TIMER_CLOCK_HZ` refleja la frecuencia real que alimenta a TIM2
+// (doblada si el bus APB1 tiene prescaler distinto de 1) y `TIMER_PERIOD`
+// se ajusta automáticamente al reloj del sistema sin valores fijos.
+#define TIMER_CLOCK_HZ  ((rcc_apb1_frequency == rcc_ahb_frequency) ? \
+                         rcc_apb1_frequency : rcc_apb1_frequency * 2)
+#define TIMER_PERIOD  (TIMER_CLOCK_HZ / TIMER_PRESCALER / TIMER_FREQUENCY_HZ)
 
 // Variables para gestionar la lógica del botón y el LED
 volatile int contador_estabilidad   = 0;

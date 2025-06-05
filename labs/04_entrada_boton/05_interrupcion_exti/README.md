@@ -80,7 +80,8 @@ Este mecanismo permite que el programa "salte automáticamente" a ejecutar una f
 ### Temporizador TIM2
 
 * Se configura para generar una interrupción cada 1 ms.
-* Se ajustan `prescaler` y `period` usando `rcc_ahb_frequency`.
+* Se ajustan `prescaler` y `period` a partir de la frecuencia real del
+  temporizador, calculada con `rcc_apb1_frequency`.
 * En su ISR, esperamos a que la lectura de la entrada sea estable durante 20 ms.
 
 ---

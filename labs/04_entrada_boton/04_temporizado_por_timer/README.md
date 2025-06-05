@@ -38,7 +38,9 @@ Se configura **TIM2** para interrumpir cada 1 ms:
 Para obtener el valor correcto del período, se utiliza:
 
 ```c
-#define TIMER_PERIOD (rcc_ahb_frequency / TIMER_PRESCALER / TIMER_FREQUENCY_HZ)
+#define TIMER_CLOCK_HZ ((rcc_apb1_frequency == rcc_ahb_frequency) ? \
+                        rcc_apb1_frequency : rcc_apb1_frequency * 2)
+#define TIMER_PERIOD   (TIMER_CLOCK_HZ / TIMER_PRESCALER / TIMER_FREQUENCY_HZ)
 ```
 
 Esto permite adaptar el código a distintas configuraciones de reloj sin asumir una frecuencia fija.
