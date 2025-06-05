@@ -15,6 +15,7 @@ void led_task(void *args) {
     }
 }
 
+#ifndef UNIT_TEST
 int main(void) {
     rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);    
 
@@ -29,4 +30,5 @@ int main(void) {
     gpio_clear(GPIOC, GPIO13);  // LED ON
     while (1);  // Esperá congelado
 }
+#endif // UNIT_TEST
 
