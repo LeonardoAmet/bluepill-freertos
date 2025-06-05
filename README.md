@@ -39,8 +39,11 @@ make flash
 
 ## 🧪 Tests
 
-Se provee un entorno de pruebas basado en [Unity](https://www.throwtheswitch.org/unity) para
-ejecutar el código en el host, con implementaciones ficticias de las funciones de `libopencm3` y FreeRTOS.
+Se provee un entorno de **tests unitarios** basado en [Unity](https://www.throwtheswitch.org/unity). Estos tests permiten
+ejecutar en la PC lógica que normalmente correría en el microcontrolador, utilizando implementaciones ficticias
+(*stubs*) de las funciones de `libopencm3` y de FreeRTOS. De esta manera es posible validar el comportamiento de las
+tareas sin necesidad de hardware real.
+
 Para compilar y correr todos los tests simplemente ejecutá:
 
 ```bash
@@ -48,6 +51,10 @@ make test
 ```
 
 Esto compila los test dentro de `tests/` y corre el binario resultante.
+
+Además, el repositorio cuenta con una configuración de **GitHub Actions** que
+compila los proyectos y ejecuta estos tests de forma automática en cada push o
+pull request. El workflow se encuentra en `.github/workflows/build.yml`.
 
 ---
 
