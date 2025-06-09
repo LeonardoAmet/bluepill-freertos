@@ -50,39 +50,39 @@ vpath %.c $(dir $(SRC))
 all: $(BUILD_DIR)/$(TARGET)
 
 $(BUILD_DIR)/$(TARGET): $(OBJ) $(LIBOPENCM3_DIR)/lib/libopencm3_stm32f1.a
-$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
-$(OBJCOPY) -O ihex   $@ $(BUILD_DIR)/$(PROJECT).hex
-$(OBJCOPY) -O binary $@ $(BUILD_DIR)/$(PROJECT).bin
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(OBJCOPY) -O ihex   $@ $(BUILD_DIR)/$(PROJECT).hex
+	$(OBJCOPY) -O binary $@ $(BUILD_DIR)/$(PROJECT).bin
 
 $(BUILD_DIR)/%.o: %.c
-@mkdir -p $(BUILD_DIR)
-$(CC) $(CFLAGS) -c $< -o $@
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBOPENCM3_DIR)/lib/libopencm3_stm32f1.a:
-$(MAKE) -C $(LIBOPENCM3_DIR)
+	$(MAKE) -C $(LIBOPENCM3_DIR)
 
 flash: $(BUILD_DIR)/$(TARGET)
-openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program $< verify reset exit"
+	openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program $< verify reset exit"
 
 openocd:
-openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
+	openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
 
 gdb: $(BUILD_DIR)/$(TARGET)
-gdb-multiarch $< -ex "target remote localhost:3333"
+	gdb-multiarch $< -ex "target remote localhost:3333"
 
 size: $(BUILD_DIR)/$(TARGET)
-arm-none-eabi-size $<
+	arm-none-eabi-size $<
 
 clean:
-rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
 
 help:
-@echo "Comandos disponibles:"
-@echo "  make           → Compila el proyecto"
-@echo "  make flash     → Flashea el binario vía OpenOCD"
-@echo "  make gdb       → Conecta GDB al target"
-@echo "  make openocd   → Lanza el servidor OpenOCD"
-@echo "  make size      → Muestra el uso de memoria"
-@echo "  make clean     → Limpia la carpeta bin/"
-@echo "  make help      → Muestra esta ayuda"
-@echo "  make all       → Compila el proyecto (alias de make)"
+	@echo "Comandos disponibles:"
+	@echo "  make           → Compila el proyecto"
+	@echo "  make flash     → Flashea el binario vía OpenOCD"
+	@echo "  make gdb       → Conecta GDB al target"
+	@echo "  make openocd   → Lanza el servidor OpenOCD"
+	@echo "  make size      → Muestra el uso de memoria"
+	@echo "  make clean     → Limpia la carpeta bin/"
+	@echo "  make help      → Muestra esta ayuda"
+	@echo "  make all       → Compila el proyecto (alias de make)"

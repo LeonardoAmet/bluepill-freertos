@@ -13,6 +13,7 @@
 # Carpetas típicas de salida (si las usás)
 build/
 output/
+bin/
 
 # Archivos de respaldo o temporales
 *~
