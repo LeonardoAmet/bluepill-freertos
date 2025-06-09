@@ -1,7 +1,45 @@
 #include "../include/fsm.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/usart.h>
 #include <stdio.h>
+
+static void send_line(const char *msg)
+{
+    while (*msg)
+        usart_send_blocking(USART1, *msg++);
+    usart_send_blocking(USART1, '\r');
+    usart_send_blocking(USART1, '\n');
+}
+
+static void gpio_setup(void)
+{
+    rcc_periph_clock_enable(RCC_GPIOC);
+    gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
+                  GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
+    gpio_clear(GPIOC, GPIO13);
+}
+
+static void usart_setup(void)
+{
+    rcc_periph_clock_enable(RCC_GPIOA);
+    rcc_periph_clock_enable(RCC_USART1);
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO9);
+    gpio_set_mode(GPIOA, GPIO_MODE_INPUT,
+                  GPIO_CNF_INPUT_PULL_UPDOWN, GPIO10);
+    gpio_set(GPIOA, GPIO10);
+
+    usart_set_baudrate(USART1, 9600);
+    usart_set_databits(USART1, 8);
+    usart_set_stopbits(USART1, USART_STOPBITS_1);
+    usart_set_mode(USART1, USART_MODE_TX_RX);
+    usart_set_parity(USART1, USART_PARITY_NONE);
+    usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
+    usart_enable(USART1);
+}
 
 static fsm_event_t event_from_char(char c) {
     switch (c) {
@@ -12,12 +50,39 @@ static fsm_event_t event_from_char(char c) {
     }
 }
 
+static void led_task(void *args)
+{
+    (void)args;
+    while (1) {
+        switch (fsm_get_state()) {
+        case STATE_OFF:
+            gpio_clear(GPIOC, GPIO13);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            break;
+        case STATE_BLINK_SLOW:
+            gpio_toggle(GPIOC, GPIO13);
+            vTaskDelay(pdMS_TO_TICKS(500));
+            break;
+        case STATE_BLINK_FAST:
+            gpio_toggle(GPIOC, GPIO13);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            break;
+        case STATE_ERROR:
+            gpio_set(GPIOC, GPIO13);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            break;
+        }
+    }
+}
+
 static void fsm_task(void *args) {
     (void)args;
     const char seq[] = {'1','2','0','x','\0'};
     fsm_reset();
     for (int i = 0; seq[i] != '\0'; ++i) {
-        printf("Input: %c\n", seq[i]);
+        char buf[16];
+        snprintf(buf, sizeof(buf), "Input: %c", seq[i]);
+        send_line(buf);
         fsm_handle_event(event_from_char(seq[i]));
         vTaskDelay(pdMS_TO_TICKS(500));
     }
@@ -25,8 +90,16 @@ static void fsm_task(void *args) {
 }
 
 int main(void) {
-    BaseType_t ok = xTaskCreate(fsm_task, "FSM", 256, NULL, 1, NULL);
+    rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
+    gpio_setup();
+    usart_setup();
+
+    BaseType_t ok;
+    ok = xTaskCreate(fsm_task, "FSM", 256, NULL, 1, NULL);
     configASSERT(ok == pdPASS);
+    ok = xTaskCreate(led_task, "LED", 128, NULL, 1, NULL);
+    configASSERT(ok == pdPASS);
+
     vTaskStartScheduler();
     while (1);
 }
