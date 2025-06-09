@@ -73,7 +73,10 @@ SECTIONS
 
   /DISCARD/ :
   {
-    *(.ARM.exidx*)
+  *(.ARM.exidx*)
   }
 
 }
+
+/* Provide symbol for newlib's _sbrk implementation */
+PROVIDE(end = _ebss);
