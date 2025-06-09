@@ -17,7 +17,7 @@ La máquina controla un LED imaginario y responde a comandos UART simulados:
   * `'2'` → pasar a `BLINK_FAST`
   * otro caracter → `ERROR`
 
-Cada variante crea una tarea llamada `fsm_task` que procesa una secuencia de comandos predefinida y envía las transiciones a través de `USART1`. Un
+Cada variante crea una tarea llamada `fsm_task` que espera caracteres recibidos en `USART1` y ejecuta la transición correspondiente. Un
 `led_task` adicional parpadea el LED conectado a `PC13` con la velocidad correspondiente a cada estado.
 
 ## Implementaciones

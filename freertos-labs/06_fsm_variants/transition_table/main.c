@@ -75,18 +75,24 @@ static void led_task(void *args)
     }
 }
 
+static char recv_char(void)
+{
+    while (!usart_get_flag(USART1, USART_SR_RXNE))
+        taskYIELD();
+    return usart_recv(USART1);
+}
+
 static void fsm_task(void *args) {
     (void)args;
-    const char seq[] = {'1','2','0','x','\0'};
     fsm_reset();
-    for (int i = 0; seq[i] != '\0'; ++i) {
+    send_line("FSM ready");
+    while (1) {
+        char c = recv_char();
         char buf[16];
-        snprintf(buf, sizeof(buf), "Input: %c", seq[i]);
+        snprintf(buf, sizeof(buf), "Input: %c", c);
         send_line(buf);
-        fsm_handle_event(event_from_char(seq[i]));
-        vTaskDelay(pdMS_TO_TICKS(500));
+        fsm_handle_event(event_from_char(c));
     }
-    while (1) vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 int main(void) {
