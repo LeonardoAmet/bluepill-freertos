@@ -1,20 +1,29 @@
 #include "../include/fsm.h"
+#include <libopencm3/stm32/usart.h>
+
+static void send_line(const char *msg)
+{
+    while (*msg)
+        usart_send_blocking(USART1, *msg++);
+    usart_send_blocking(USART1, '\r');
+    usart_send_blocking(USART1, '\n');
+}
 
 static fsm_state_t current_state = STATE_OFF;
 
 static void enter_state(fsm_state_t state) {
     switch (state) {
     case STATE_OFF:
-        printf("LED OFF\n");
+        send_line("LED OFF");
         break;
     case STATE_BLINK_SLOW:
-        printf("Blinking SLOW\n");
+        send_line("Blinking SLOW");
         break;
     case STATE_BLINK_FAST:
-        printf("Blinking FAST\n");
+        send_line("Blinking FAST");
         break;
     case STATE_ERROR:
-        printf("ERROR state\n");
+        send_line("ERROR state");
         break;
     }
 }
