@@ -12,7 +12,7 @@
             // Ruta al archivo ELF generado por la compilación
             // Este archivo contiene código, símbolos, información de depuración, etc.
             //"executable": "./bin/blink_minimal.elf",
-            "executable": "${workspaceFolder}/freertos-labs/01_blink_task/bin/main.elf",
+            "executable": "${workspaceFolder}/freertos-labs/06_fsm_variants/func_pointer/bin/main.elf",
             
 
 
