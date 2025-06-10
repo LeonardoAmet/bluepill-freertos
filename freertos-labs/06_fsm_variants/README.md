@@ -4,7 +4,7 @@ Este ejemplo muestra cuatro estilos para implementar una misma máquina de estad
 
 ## Descripción de la FSM
 
-La máquina controla un LED imaginario y responde a comandos UART simulados:
+La máquina controla el LED onblard y responde a comandos UART simulados:
 
 * Estados:
   * `OFF`
@@ -45,20 +45,6 @@ Cada variante crea una tarea llamada `fsm_task` que espera caracteres recibidos 
 
 ## Compilación y ejecución
 
-Cada implementación posee su propio `Makefile` compatible con el resto de los laboratorios. Para compilar, por ejemplo:
-
-```bash
-make -C switch_case
-```
-
+Cada implementación posee su propio `Makefile` compatible con el resto de los laboratorios. Se compila con `make`.
 Los binarios generados pueden flashearse con `make flash` como en los demás ejemplos.
-
-Los tests unitarios se encuentran en `tests/` y se ejecutan con:
-
-```bash
-make -C tests run
-```
-
-## ¿Qué es una FSM?
-
-Una *máquina de estados finita* describe el comportamiento de un sistema que puede estar en un conjunto limitado de estados y cambiar entre ellos según eventos externos. En sistemas embebidos se utiliza para modelar protocolos y secuencias de control de forma clara y mantenible.
+Abrir una terminar (PuTTY o similar) y utilizar `0`, `1` y `2` para transionar entre estados. Cualquier otro caracter nos lleva a un estador de "error", el cual simplemente apaga el LED.

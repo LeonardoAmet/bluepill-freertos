@@ -56,7 +56,7 @@ static void led_task(void *args)
     while (1) {
         switch (fsm_get_state()) {
         case STATE_OFF:
-            gpio_clear(GPIOC, GPIO13);
+            gpio_set(GPIOC, GPIO13);
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         case STATE_BLINK_SLOW:
@@ -68,31 +68,25 @@ static void led_task(void *args)
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         case STATE_ERROR:
-            gpio_set(GPIOC, GPIO13);
+            gpio_clear(GPIOC, GPIO13);
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         }
     }
 }
 
-static char recv_char(void)
-{
-    while (!usart_get_flag(USART1, USART_SR_RXNE))
-        taskYIELD();
-    return usart_recv(USART1);
-}
-
 static void fsm_task(void *args) {
     (void)args;
+    const char seq[] = {'1','2','0','x','\0'};
     fsm_reset();
-    send_line("FSM ready");
-    while (1) {
-        char c = recv_char();
+    for (int i = 0; seq[i] != '\0'; ++i) {
         char buf[16];
-        snprintf(buf, sizeof(buf), "Input: %c", c);
+        snprintf(buf, sizeof(buf), "Input: %c", seq[i]);
         send_line(buf);
-        fsm_handle_event(event_from_char(c));
+        fsm_handle_event(event_from_char(seq[i]));
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
+    while (1) vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 int main(void) {

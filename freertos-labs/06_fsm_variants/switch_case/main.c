@@ -56,7 +56,7 @@ static void led_task(void *args)
     while (1) {
         switch (fsm_get_state()) {
         case STATE_OFF:
-            gpio_clear(GPIOC, GPIO13);
+            gpio_set(GPIOC, GPIO13);
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         case STATE_BLINK_SLOW:
@@ -68,7 +68,7 @@ static void led_task(void *args)
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         case STATE_ERROR:
-            gpio_set(GPIOC, GPIO13);
+            gpio_clear(GPIOC, GPIO13);
             vTaskDelay(pdMS_TO_TICKS(100));
             break;
         }
