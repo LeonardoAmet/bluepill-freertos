@@ -1,50 +1,54 @@
-# Laboratorio 06 - Variantes de FSM en C
+# Laboratorio 06 - Variantes de implementación de FSM
 
-Este ejemplo muestra cuatro estilos para implementar una misma máquina de estados finita (FSM) en C. Todas las variantes exponen la función común `fsm_handle_event()` y ejecutan la lógica dentro de una tarea de FreeRTOS.
+Este laboratorio ilustra cuatro maneras distintas de programar una misma máquina de estados finita (FSM) en lenguaje C.  Todas las variantes comparten la interfaz declarada en `include/fsm.h` y ejecutan su lógica dentro de una tarea de FreeRTOS.
 
 ## Descripción de la FSM
 
-La máquina controla el LED onblard y responde a comandos UART simulados:
+La FSM controla el LED integrado y responde a comandos recibidos por UART. Los estados posibles son:
 
-* Estados:
-  * `OFF`
-  * `BLINK_SLOW` (1 Hz)
-  * `BLINK_FAST` (5 Hz)
-  * `ERROR`
-* Eventos de entrada:
-  * `'0'` → pasar a `OFF`
-  * `'1'` → pasar a `BLINK_SLOW`
-  * `'2'` → pasar a `BLINK_FAST`
-  * otro caracter → `ERROR`
+- `OFF`
+- `BLINK_SLOW` (1&nbsp;Hz)
+- `BLINK_FAST` (5&nbsp;Hz)
+- `ERROR`
 
-Cada variante crea una tarea llamada `fsm_task` que espera caracteres recibidos en `USART1` y ejecuta la transición correspondiente. Un
-`led_task` adicional parpadea el LED conectado a `PC13` con la velocidad correspondiente a cada estado.
+Los eventos que disparan transiciones se obtienen de los caracteres `0`, `1` y `2` recibidos. Cualquier otro valor se considera inválido y lleva al estado `ERROR`.
 
-## Implementaciones
+Cada proyecto crea una tarea `fsm_task` que lee la UART y llama a `fsm_handle_event()`. Aparte existe `led_task`, responsable de parpadear `PC13` con la velocidad asociada al estado actual.
 
-| Carpeta            | Descripción breve |
-|--------------------|-------------------|
-| `switch_case/`     | `switch` anidados por estado y evento. |
-| `func_pointer/`    | Array de punteros a función para cada estado. |
-| `transition_table/`| Tabla de transición `estado × evento`. |
-| `state_pattern/`   | Implementación del *State Pattern*. |
+## Implementaciones detalladas
 
-### Ventajas y desventajas
+### 1. `switch_case/`
+Implementa la máquina mediante `switch` anidados. El primer `switch` selecciona el estado actual y dentro de cada caso otro `switch` resuelve el evento recibido. Es la forma más directa de expresar la lógica, aunque a medida que crecen los estados y eventos el código se vuelve difícil de seguir.
 
-* **Switch/Case**: sencillo pero puede crecer mucho.
-* **Punteros a función**: separa el código por estado y facilita extender acciones.
-* **Tabla de transición**: compacta y fácil de visualizar para FSM regulares.
-* **State Pattern**: flexible y escalable, algo más verboso.
+### 2. `func_pointer/`
+Utiliza un arreglo de punteros a función, donde cada posición corresponde a un estado. `fsm_handle_event()` simplemente invoca `handlers[current_state](event)` y cada función realiza las transiciones necesarias. Esta organización reduce los `switch` y permite separar claramente el código de cada estado.
 
-### ¿Cuándo usar cada una?
+### 3. `transition_table/`
+En esta variante se define una matriz `estado × evento` donde cada entrada indica el próximo estado. `fsm_handle_event()` consulta la tabla y luego llama a `enter_state()` para ejecutar las acciones asociadas (mostrar mensajes, reiniciar temporizadores, etc.). Es muy compacta y conveniente cuando la FSM es regular y no requiere acciones complejas por transición.
 
-* `switch_case/`: FSM pequeñas o prototipos rápidos.
-* `func_pointer/`: cuando los estados tienen comportamientos bien diferenciados.
-* `transition_table/`: si la FSM es regular y las acciones son breves.
-* `state_pattern/`: proyectos grandes que requieran extensibilidad.
+### 4. `state_pattern/`
+Se inspira en el *State Pattern*: cada estado tiene asociada una función que implementa su comportamiento. `fsm_handle_event()` delega en la función correspondiente y el estado puede cambiarse modificando `current_state`. En proyectos grandes resulta flexible, pues permite agregar funciones de entrada/salida o incluso dividir el código de cada estado en archivos separados.
+
+## Ventajas y desventajas (resumen)
+
+- **Switch/Case:** simple de entender, pero el tamaño del código crece rápidamente.
+- **Punteros a función:** organiza mejor las funciones y facilita extender acciones.
+- **Tabla de transición:** muy compacta; ideal para FSM regulares y pequeñas.
+- **State Pattern:** modular y escalable a costa de algo más de código.
 
 ## Compilación y ejecución
 
-Cada implementación posee su propio `Makefile` compatible con el resto de los laboratorios. Se compila con `make`.
-Los binarios generados pueden flashearse con `make flash` como en los demás ejemplos.
-Abrir una terminar (PuTTY o similar) y utilizar `0`, `1` y `2` para transionar entre estados. Cualquier otro caracter nos lleva a un estador de "error", el cual simplemente apaga el LED.
+Cada carpeta contiene su propio `Makefile`. Para compilar una implementación:
+
+```bash
+make
+```
+
+El binario resultante puede flashearse con:
+
+```bash
+make flash
+```
+
+Al ejecutar, envíe por la UART los caracteres `0`, `1` y `2` para cambiar entre estados. Cualquier otro carácter lleva al estado de error donde el LED permanece apagado.
+
