@@ -9,115 +9,85 @@ static void send_line(const char *msg)
     usart_send_blocking(USART1, '\n');
 }
 
-typedef void (*state_func_t)(fsm_event_t);
+struct state;
+typedef const struct state *state_ptr;
 
-static fsm_state_t current_state = STATE_OFF;
-
-static void enter_state(fsm_state_t s) {
-    switch (s) {
-    case STATE_OFF: send_line("LED OFF"); break;
-    case STATE_BLINK_SLOW: send_line("Blinking SLOW"); break;
-    case STATE_BLINK_FAST: send_line("Blinking FAST"); break;
-    case STATE_ERROR: send_line("ERROR state"); break;
-    }
-}
-
-static void state_off(fsm_event_t e);
-static void state_blink_slow(fsm_event_t e);
-static void state_blink_fast(fsm_event_t e);
-static void state_error(fsm_event_t e);
-
-static state_func_t state_handlers[] = {
-    state_off,
-    state_blink_slow,
-    state_blink_fast,
-    state_error
+struct state {
+    fsm_state_t id;
+    void (*enter)(void);
+    state_ptr (*on_event)(fsm_event_t e);
 };
 
-void fsm_reset(void) { current_state = STATE_OFF; }
+static state_ptr current_state;
 
-fsm_state_t fsm_get_state(void) { return current_state; }
+/* Forward declarations */
+static state_ptr off_on_event(fsm_event_t e);
+static state_ptr blink_slow_on_event(fsm_event_t e);
+static state_ptr blink_fast_on_event(fsm_event_t e);
+static state_ptr error_on_event(fsm_event_t e);
 
-static void state_off(fsm_event_t e) {
+static void enter_off(void) { send_line("LED OFF"); }
+static void enter_blink_slow(void) { send_line("Blinking SLOW"); }
+static void enter_blink_fast(void) { send_line("Blinking FAST"); }
+static void enter_error(void) { send_line("ERROR state"); }
+
+static const struct state s_off = {STATE_OFF, enter_off, off_on_event};
+static const struct state s_blink_slow = {STATE_BLINK_SLOW, enter_blink_slow, blink_slow_on_event};
+static const struct state s_blink_fast = {STATE_BLINK_FAST, enter_blink_fast, blink_fast_on_event};
+static const struct state s_error = {STATE_ERROR, enter_error, error_on_event};
+
+static state_ptr off_on_event(fsm_event_t e)
+{
     switch (e.type) {
-    case EVENT_CMD_0:
-        enter_state(STATE_OFF);
-        break;
-    case EVENT_CMD_1:
-        current_state = STATE_BLINK_SLOW;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_2:
-        current_state = STATE_BLINK_FAST;
-        enter_state(current_state);
-        break;
-    default:
-        current_state = STATE_ERROR;
-        enter_state(current_state);
-        break;
+    case EVENT_CMD_0: return &s_off;
+    case EVENT_CMD_1: return &s_blink_slow;
+    case EVENT_CMD_2: return &s_blink_fast;
+    default: return &s_error;
     }
 }
 
-static void state_blink_slow(fsm_event_t e) {
+static state_ptr blink_slow_on_event(fsm_event_t e)
+{
     switch (e.type) {
-    case EVENT_CMD_0:
-        current_state = STATE_OFF;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_1:
-        enter_state(STATE_BLINK_SLOW);
-        break;
-    case EVENT_CMD_2:
-        current_state = STATE_BLINK_FAST;
-        enter_state(current_state);
-        break;
-    default:
-        current_state = STATE_ERROR;
-        enter_state(current_state);
-        break;
+    case EVENT_CMD_0: return &s_off;
+    case EVENT_CMD_1: return &s_blink_slow;
+    case EVENT_CMD_2: return &s_blink_fast;
+    default: return &s_error;
     }
 }
 
-static void state_blink_fast(fsm_event_t e) {
+static state_ptr blink_fast_on_event(fsm_event_t e)
+{
     switch (e.type) {
-    case EVENT_CMD_0:
-        current_state = STATE_OFF;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_1:
-        current_state = STATE_BLINK_SLOW;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_2:
-        enter_state(STATE_BLINK_FAST);
-        break;
-    default:
-        current_state = STATE_ERROR;
-        enter_state(current_state);
-        break;
+    case EVENT_CMD_0: return &s_off;
+    case EVENT_CMD_1: return &s_blink_slow;
+    case EVENT_CMD_2: return &s_blink_fast;
+    default: return &s_error;
     }
 }
 
-static void state_error(fsm_event_t e) {
+static state_ptr error_on_event(fsm_event_t e)
+{
     switch (e.type) {
-    case EVENT_CMD_0:
-        current_state = STATE_OFF;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_1:
-        current_state = STATE_BLINK_SLOW;
-        enter_state(current_state);
-        break;
-    case EVENT_CMD_2:
-        current_state = STATE_BLINK_FAST;
-        enter_state(current_state);
-        break;
-    default:
-        enter_state(STATE_ERROR);
-        break;
+    case EVENT_CMD_0: return &s_off;
+    case EVENT_CMD_1: return &s_blink_slow;
+    case EVENT_CMD_2: return &s_blink_fast;
+    default: return &s_error;
     }
 }
 
-void fsm_handle_event(fsm_event_t event) {
-    state_handlers[current_state](event);
+void fsm_reset(void)
+{
+    current_state = &s_off;
+}
+
+fsm_state_t fsm_get_state(void)
+{
+    return current_state->id;
+}
+
+void fsm_handle_event(fsm_event_t event)
+{
+    current_state = current_state->on_event(event);
+    current_state->enter();
 }

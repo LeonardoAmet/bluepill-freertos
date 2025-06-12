@@ -7,6 +7,7 @@ void setUp(void) { fsm_reset(); }
 void tearDown(void) {}
 
 void test_state_pattern(void) {
+    fsm_reset();
     fsm_handle_event((fsm_event_t){EVENT_CMD_1});
     TEST_ASSERT_EQUAL_INT(STATE_BLINK_SLOW, fsm_get_state());
     fsm_handle_event((fsm_event_t){EVENT_CMD_2});

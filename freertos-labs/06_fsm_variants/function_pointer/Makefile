@@ -39,7 +39,7 @@ FREERTOS_SRC = \
     $(FREERTOS_DIR)/heap_4.c \
     $(FREERTOS_DIR)/portable/GCC/ARM_CM3/port.c
 
-SRC = main.c fsm_func_pointer.c $(FREERTOS_SRC)
+SRC = main.c fsm_function_pointer.c $(FREERTOS_SRC)
 
 OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(SRC)))
 

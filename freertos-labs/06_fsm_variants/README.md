@@ -25,7 +25,7 @@ Cada variante crea una tarea llamada `fsm_task` que espera caracteres recibidos 
 | Carpeta            | Descripción breve |
 |--------------------|-------------------|
 | `switch_case/`     | `switch` anidados por estado y evento. |
-| `func_pointer/`    | Array de punteros a función para cada estado. |
+| `function_pointer/`| Array de punteros a función para cada estado. |
 | `transition_table/`| Tabla de transición `estado × evento`. |
 | `state_pattern/`   | Implementación del *State Pattern*. |
 
@@ -39,7 +39,7 @@ Cada variante crea una tarea llamada `fsm_task` que espera caracteres recibidos 
 ### ¿Cuándo usar cada una?
 
 * `switch_case/`: FSM pequeñas o prototipos rápidos.
-* `func_pointer/`: cuando los estados tienen comportamientos bien diferenciados.
+* `function_pointer/`: cuando los estados tienen comportamientos bien diferenciados.
 * `transition_table/`: si la FSM es regular y las acciones son breves.
 * `state_pattern/`: proyectos grandes que requieran extensibilidad.
 
