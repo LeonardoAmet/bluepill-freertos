@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /*-----------------------------------------------------------
- * Configuración del kernel
+ * Configuracion del kernel
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION                    1
@@ -22,7 +22,7 @@
 #define configIDLE_SHOULD_YIELD                 1
 
 /*-----------------------------------------------------------
- * Configuración de sincronización y recursos
+ * Configuracion de sincronizacion y recursos
  *----------------------------------------------------------*/
 
 #define configUSE_MUTEXES                       1
@@ -31,7 +31,7 @@
 #define configQUEUE_REGISTRY_SIZE               8
 
 /*-----------------------------------------------------------
- * Inclusión de funciones de la API
+ * Inclusion de funciones de la API
  *----------------------------------------------------------*/
 
 #define INCLUDE_vTaskDelay                      1
@@ -43,7 +43,7 @@
 #define INCLUDE_xTaskGetSchedulerState          1
 
 /*-----------------------------------------------------------
- * Seguridad y depuración
+ * Seguridad y depuracion
  *----------------------------------------------------------*/
 
 #define configASSERT(x) if((x) == 0) { taskDISABLE_INTERRUPTS(); for(;;); }

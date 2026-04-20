@@ -1,22 +1,25 @@
 {
-    "configurations": [
-      {
-        "name": "STM32",
-        "includePath": [
-          "${workspaceFolder}/libopencm3/include",
-          "${workspaceFolder}/common",
-          "${workspaceFolder}/labs/**",
-          "${workspaceFolder}/freertos-labs/**",
-          "${workspaceFolder}/freertos/**"
-        ],
-        "defines": [
-          "STM32F1"
-        ],
-        "compilerPath": "/usr/bin/arm-none-eabi-gcc",
-        "cStandard": "c11",
-        "intelliSenseMode": "gcc-arm"
-      }
-    ],
-    "version": 4
-  }
-  
+  "configurations": [
+    {
+      "name": "STM32 FreeRTOS",
+      "includePath": [
+        "${workspaceFolder}/libopencm3/include",
+        "${workspaceFolder}/common",
+        "${workspaceFolder}/freertos",
+        "${workspaceFolder}/freertos/include",
+        "${workspaceFolder}/freertos/portable/GCC/ARM_CM3",
+        "${workspaceFolder}/freertos-labs/**",
+        "${workspaceFolder}/tests",
+        "${workspaceFolder}/tests/stubs",
+        "${workspaceFolder}/tests/unity"
+      ],
+      "defines": [
+        "STM32F1"
+      ],
+      "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+      "cStandard": "c11",
+      "intelliSenseMode": "gcc-arm"
+    }
+  ],
+  "version": 4
+}

@@ -1,22 +1,28 @@
 > 🧠 Este repositorio contiene únicamente ejemplos que utilizan **FreeRTOS** sobre STM32F103C8T6 y **libopencm3**.
 > No incluye ejemplos bare-metal. Para esos, consultá el repositorio `bluepill-libopencm3`.
 
-# Proyecto Base: FreeRTOS + libopencm3 en STM32F103C8T6
+# bluepill-freertos
 
-Este repositorio contiene una base mínima pero funcional para trabajar con **FreeRTOS** sobre un microcontrolador **STM32F103C8T6**, usando la biblioteca **libopencm3**. Está pensado como punto de partida para proyectos con múltiples tareas, sincronización, y periféricos del microcontrolador.
+Este repositorio reúne los laboratorios de **FreeRTOS** para la placa **STM32F103C8T6 (Blue Pill)** usando **libopencm3** como capa de acceso al hardware. Está pensado como continuación natural del recorrido bare-metal: primero se trabaja con periféricos e interrupciones en `bluepill-libopencm3`, y luego se incorporan tareas, colas, semáforos y sincronización en este repo.
+
+Si buscás los ejemplos introductorios sin RTOS, están en:
+
+- `bluepill-libopencm3` → GPIO, UART, timers, EXTI y antirrebote con libopencm3
+- `bluepill-freertos` → tasks, queues, mutexes, semáforos y variantes FSM con FreeRTOS
 
 ---
 
 ## 🧱 Estructura del proyecto
 
 ```
-/common                → linker.ld
+/common                → linker.ld y FreeRTOSConfig.h compartido
 /freertos              → código fuente de FreeRTOS
 /libopencm3            → submódulo con libopencm3
 /freertos-labs/        → proyectos basados en FreeRTOS
 ```
 
 Cada subcarpeta en `freertos-labs/` es un proyecto independiente con su propio `Makefile`.
+Todos comparten `common/FreeRTOSConfig.h` para mantener consistente la configuración del kernel y simplificar IntelliSense.
 
 ---
 
