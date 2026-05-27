@@ -1,84 +1,72 @@
-> 🧠 Este repositorio contiene únicamente ejemplos que utilizan **FreeRTOS** sobre STM32F103C8T6 y **libopencm3**.
-> No incluye ejemplos bare-metal. Para esos, consultá el repositorio `bluepill-libopencm3`.
+> Este repositorio contiene ejemplos con FreeRTOS sobre STM32F103C8T6 y libopencm3.
+> Los ejemplos bare-metal están en `bluepill-libopencm3`.
 
 # bluepill-freertos
 
-Este repositorio reúne los laboratorios de **FreeRTOS** para la placa **STM32F103C8T6 (Blue Pill)** usando **libopencm3** como capa de acceso al hardware. Está pensado como continuación natural del recorrido bare-metal: primero se trabaja con periféricos e interrupciones en `bluepill-libopencm3`, y luego se incorporan tareas, colas, semáforos y sincronización en este repo.
+Este repositorio reúne laboratorios de FreeRTOS para la placa Blue Pill (STM32F103C8T6) usando libopencm3 como capa de acceso al hardware.
 
-Si buscás los ejemplos introductorios sin RTOS, están en:
+Está pensado como continuación del recorrido bare-metal:
 
-- `bluepill-libopencm3` → GPIO, UART, timers, EXTI y antirrebote con libopencm3
-- `bluepill-freertos` → tasks, queues, mutexes, semáforos y variantes FSM con FreeRTOS
+- `bluepill-libopencm3` para GPIO, UART, timers, EXTI y antirrebote,
+- `bluepill-freertos` para tareas, colas, mutexes, semáforos y variantes de FSM con RTOS.
 
----
+## Estructura del proyecto
 
-## 🧱 Estructura del proyecto
-
-```
-/common                → linker.ld y FreeRTOSConfig.h compartido
-/freertos              → código fuente de FreeRTOS
-/libopencm3            → submódulo con libopencm3
-/freertos-labs/        → proyectos basados en FreeRTOS
+```text
+/common         -> linker.ld y FreeRTOSConfig.h compartidos
+/freertos       -> kernel de FreeRTOS
+/libopencm3     -> submódulo libopencm3
+/freertos-labs/ -> proyectos independientes basados en FreeRTOS
 ```
 
-Cada subcarpeta en `freertos-labs/` es un proyecto independiente con su propio `Makefile`.
-Todos comparten `common/FreeRTOSConfig.h` para mantener consistente la configuración del kernel y simplificar IntelliSense.
+Cada subdirectorio dentro de `freertos-labs/` tiene su propio `Makefile`. La configuración del kernel se centraliza en `common/FreeRTOSConfig.h`.
 
----
+## Compilación
 
-## ⚙️ Compilación
-
-Para compilar un proyecto:
+Ejemplo:
 
 ```bash
 cd freertos-labs/01_blink_task
 make
 ```
 
-Esto genera el binario `.elf`, `.bin` y `.hex` en la carpeta `bin/`.
-
-Para flashear con OpenOCD:
+Para flashear:
 
 ```bash
 make flash
 ```
 
-## 🧪 Tests
+## Tests
 
-Se provee un entorno de **tests unitarios** basado en [Unity](https://www.throwtheswitch.org/unity). Estos tests permiten
-ejecutar en la PC lógica que normalmente correría en el microcontrolador, utilizando implementaciones ficticias
-(*stubs*) de las funciones de `libopencm3` y de FreeRTOS. De esta manera es posible validar el comportamiento de las
-tareas sin necesidad de hardware real.
+El repositorio incluye tests unitarios con [Unity](https://www.throwtheswitch.org/unity). La idea es poder validar parte de la lógica en la PC usando stubs de funciones de libopencm3 y de FreeRTOS.
 
-Para compilar y correr todos los tests simplemente ejecutá:
+Para correrlos:
 
 ```bash
 make test
 ```
 
-Esto compila los test dentro de `tests/` y corre el binario resultante.
+También hay integración en GitHub Actions para compilar los proyectos y ejecutar los tests automáticamente.
 
-Además, el repositorio cuenta con una configuración de **GitHub Actions** que
-compila los proyectos y ejecuta estos tests de forma automática en cada push o
-pull request. El workflow se encuentra en `.github/workflows/build.yml`.
+## Detalles técnicos importantes
 
----
+### FreeRTOS y la tabla de vectores
 
-## 🧠 Detalles técnicos importantes
+FreeRTOS necesita que estos handlers estén exactamente en la tabla de vectores:
 
-### ✔️ FreeRTOS y la tabla de vectores
+- `vPortSVCHandler`
+- `xPortPendSVHandler`
+- `xPortSysTickHandler`
 
-FreeRTOS necesita que los siguientes handlers estén **exactamente en la tabla de vectores** del micro:
+libopencm3, por su parte, define handlers `__weak` con otros nombres:
 
-* `vPortSVCHandler`
-* `xPortPendSVHandler`
-* `xPortSysTickHandler`
+- `sv_call_handler`
+- `pend_sv_handler`
+- `sys_tick_handler`
 
-Sin embargo, libopencm3 define sus propios handlers (`sv_call_handler`, `pend_sv_handler`, `sys_tick_handler`) como `__weak`.
+### Solución adoptada
 
-### ✅ Solución adoptada
-
-Este proyecto **no redefine funciones ni usa `alias()`**. En cambio, usa una técnica más simple: **macros en `FreeRTOSConfig.h`** que redirigen los nombres requeridos por FreeRTOS a los handlers definidos por libopencm3:
+En este repo no se redefinen funciones ni se usan aliases. Se resuelve con macros en `FreeRTOSConfig.h`:
 
 ```c
 #define vPortSVCHandler     sv_call_handler
@@ -86,23 +74,22 @@ Este proyecto **no redefine funciones ni usa `alias()`**. En cambio, usa una té
 #define xPortSysTickHandler sys_tick_handler
 ```
 
-Esto asegura que FreeRTOS funcione correctamente sin conflictos de símbolos ni problemas de linker.
+Eso evita conflictos de símbolos y mantiene la tabla de vectores coherente con libopencm3.
 
----
+## Dependencias
 
-## 📌 Dependencias
+- [libopencm3](https://github.com/libopencm3/libopencm3)
+- [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel)
+- `arm-none-eabi-gcc`
+- `make`
+- `openocd`
+- `gdb-multiarch`
 
-* [libopencm3](https://github.com/libopencm3/libopencm3) (agregado como submódulo)
-* [FreeRTOS kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel)
-* Toolchain: `arm-none-eabi-gcc`, `make`, `openocd`, `gdb-multiarch`
+## Debug con VS Code
 
----
+El repositorio puede usarse con Cortex-Debug en Visual Studio Code.
 
-## 🔧 Debug con VS Code
-
-Este proyecto utiliza la extensión Cortex-Debug para Visual Studio Code, la cual permite depurar firmware ARM Cortex-M a través de gdb-multiarch y OpenOCD.
-
-Incluye configuración en `.vscode/launch.json` para depuración con `gdb-multiarch` y `OpenOCD`. Verificá que el archivo ELF y los paths sean correctos para tu proyecto:
+Ejemplo de configuración esperada:
 
 ```json
 "executable": "${workspaceFolder}/freertos-labs/01_blink_task/bin/main.elf",
@@ -112,50 +99,44 @@ Incluye configuración en `.vscode/launch.json` para depuración con `gdb-multia
 ]
 ```
 
----
-### 🔧 Mecanismos de sincronización en FreeRTOS
+## Mecanismos de sincronización en FreeRTOS
 
-En sistemas de tiempo real como FreeRTOS, los mecanismos de sincronización son fundamentales para coordinar el acceso a recursos compartidos, sincronizar tareas y responder a eventos generados por interrupciones. FreeRTOS ofrece distintas primitivas que permiten implementar desde exclusión mutua hasta transferencia de datos o señalización de eventos.
+FreeRTOS ofrece varias primitivas para resolver exclusión mutua, señalización y paso de datos.
 
-A continuación se presenta una descripción breve de cada uno:
+- **Mutex**: protege recursos compartidos y tiene herencia de prioridad.
+- **Recursive Mutex**: igual que el mutex, pero puede ser tomado varias veces por la misma tarea.
+- **Semáforo binario**: señalización simple entre tareas o desde ISR.
+- **Semáforo de conteo**: acumula múltiples eventos.
+- **Queue**: paso de datos FIFO entre tareas o desde ISR.
+- **Event group**: sincronización basada en bits de evento.
+- **Delay / Sleep**: suspensión temporal de tareas; no es una primitiva de sincronización entre contextos.
 
-* **Mutex**: se utiliza para proteger recursos compartidos entre tareas. Solo una tarea puede tener el mutex a la vez. Implementa herencia de prioridad, lo que lo hace ideal para evitar la inversión de prioridades.
-* **Recursive Mutex**: similar al mutex, pero permite que una misma tarea lo tome múltiples veces (por ejemplo, en funciones recursivas o anidadas).
-* **Semáforo binario**: permite la señalización de eventos entre tareas o desde interrupciones. No protege recursos ni tiene herencia de prioridad. Es útil, por ejemplo, para indicar que ocurrió un evento.
-* **Semáforo de conteo**: permite acumular eventos (por ejemplo, varias interrupciones), ya que su contador puede incrementarse varias veces. No transfiere datos, pero es útil para sincronizar con tareas que procesan eventos múltiples.
-* **Queue**: permite pasar datos entre tareas o desde interrupciones de manera segura y ordenada (FIFO). También sincroniza, pero su función principal es el paso de datos.
-* **Event group**: permite que una tarea espere a que se cumplan una o varias condiciones (bits). Es útil para coordinar tareas que deben reaccionar a múltiples eventos.
-* **Delay / Sleep**: no es un mecanismo de sincronización entre tareas, pero permite suspender la ejecución de una tarea por un período definido.
+### Resumen comparativo
 
-### 📋 Resumen comparativo
+| Mecanismo | Uso típico | Herencia de prioridad | Uso desde ISR |
+| --- | --- | --- | --- |
+| Mutex | Exclusión mutua | Sí | No |
+| Recursive Mutex | Exclusión mutua recursiva | Sí | No |
+| Semáforo binario | Señalización | No | Sí |
+| Semáforo de conteo | Acumulación de eventos | No | Sí |
+| Queue | Paso de datos | No | Sí |
+| Event group | Sincronización por eventos | No | Sí |
+| Delay / Sleep | Suspensión temporal | No | No |
 
-| Mecanismo              | Uso típico                          | ¿Herencia de prioridad? | ¿Desde ISR? |
-| ---------------------- | ----------------------------------- | ----------------------- | ----------- |
-| **Mutex**              | Exclusión mutua                     | ✅ Sí                    | ❌ No        |
-| **Recursive Mutex**    | Exclusión mutua (recursiva)         | ✅ Sí                    | ❌ No        |
-| **Semáforo binario**   | Señalización (evento)               | ❌ No                    | ✅ Sí        |
-| **Semáforo de conteo** | Acumulación de eventos              | ❌ No                    | ✅ Sí        |
-| **Queue**              | Paso de datos                       | ❌ No                    | ✅ Sí        |
-| **Event group**        | Sincronización de múltiples eventos | ❌ No                    | ✅ Sí        |
-| **Delay / Sleep**      | Suspensión temporal de tareas       | ❌ No                    | ❌ No        |
+Notas:
 
-**Notas:**
+- solo los mutex implementan herencia de prioridad,
+- queues y semáforos pueden usarse desde interrupciones con sus variantes `FromISR()`,
+- queues y semáforos cumplen roles diferentes: una queue transfiere datos; un semáforo solo sincroniza.
 
-* ✅ **Herencia de prioridad**: permite que una tarea de baja prioridad que posee un recurso compartido herede temporalmente la prioridad de una tarea más prioritaria que espera ese recurso. Esto previene la inversión de prioridades.
-* **Mutex** y **Recursive Mutex** son los únicos mecanismos de FreeRTOS que implementan herencia de prioridad.
-* Los **semáforos** y **queues** son seguros para usar en ISRs con sus funciones terminadas en `FromISR()`.
-* Las **queues** permiten pasar datos y sincronizar a la vez, mientras que los **semáforos** sólo sincronizan.
+Referencias:
 
-Para más información:
+- [Mutexes - FreeRTOS](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/04-Mutexes)
+- [Binary Semaphores](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/02-Binary-semaphores)
+- [Counting Semaphores](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/03-Counting-semaphores)
+- [Queues](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/01-Queues)
+- [Event Groups](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/06-Event-groups)
 
-* [Mutexes - FreeRTOS](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/04-Mutexes)
-* [Semáforos binarios](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/02-Binary-semaphores)
-* [Semáforos de conteo](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/03-Counting-semaphores)
-* [Queues](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/01-Queues)
-* [Event Groups](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/06-Event-groups)
+## Licencia
 
----
-
-## 📜 Licencia
-
-MIT para el código propio. FreeRTOS y libopencm3 tienen sus propias licencias compatibles.
+El código propio del repositorio usa licencia MIT. FreeRTOS y libopencm3 mantienen sus licencias respectivas.
